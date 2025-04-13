@@ -67,5 +67,13 @@ public class GreetingResource {
                                 .collect(Collectors.joining(", "))))
                 .collect(Collectors.joining("\n"));
     }
-
+    @GET
+    @Path("/update/{minLength}/{rentalRate}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String update(short minLength, Float rentalRate) {
+        filmRepo.updateRentalRate(minLength, rentalRate);
+        return filmRepo.getFilms(minLength)
+                .map(f -> String.format("%s (%d min) - $%f", f.getTitle(), f.getLength(), f.getRentalRate()))
+                .collect(Collectors.joining("\n"));
+    }
 }

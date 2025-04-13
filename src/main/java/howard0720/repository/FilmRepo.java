@@ -7,6 +7,7 @@ import howard0720.model.Film;
 import howard0720.model.Film$;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -24,6 +25,14 @@ public class FilmRepo {
                 .filter(Film$.filmId.equal(filmId))
                 .findFirst();
     }
+
+    public Stream<Film> getFilms(short minLength) {
+        return jpaStreamer.stream(Film.class)
+                .filter(Film$.length.greaterThan(minLength))
+                .sorted(Film$.length);
+    }
+
+
     public Stream<Film> paged(long page, short minLength) {
         return jpaStreamer.stream(Film.class)
                 .filter(Film$.length.greaterThan(minLength)) //過濾條件： 只保留 length > minLength 的影片。
@@ -31,8 +40,9 @@ public class FilmRepo {
                 .skip(page * PAGE_SIZE) //跳過筆數： 根據第幾頁跳過前面 N 筆資料。
                 .limit(PAGE_SIZE); //限制筆數： 只保留這一頁的資料（每頁固定大小）。
     }
+
     public Stream<Film> pagedImprove(long page, short minLength) {
-        return jpaStreamer.stream(Projection.select(Film$.filmId,Film$.title,Film$.length)) //只查詢特定欄位
+        return jpaStreamer.stream(Projection.select(Film$.filmId, Film$.title, Film$.length)) //只查詢特定欄位
                 .filter(Film$.length.greaterThan(minLength))
                 .sorted(Film$.length)
                 .skip(page * PAGE_SIZE)
@@ -49,6 +59,16 @@ public class FilmRepo {
                 .filter(Film$.title.startsWith(startsWith)
                         .and(Film$.length.greaterThan(minLength)))
                 .sorted(Film$.length.reversed());
+    }
+
+    @Transactional //方法執行於一個交易中。
+    public void updateRentalRate(short minLength, Float rentalRate) {
+        jpaStreamer.stream(Film.class)
+                .filter(Film$.length.greaterThan(minLength))
+                .forEach(f -> {
+                    f.setRentalRate(rentalRate);
+                });
+
     }
 
 }
