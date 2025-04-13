@@ -1,4 +1,4 @@
-package howard0720;
+package howard0720.controller;
 
 import howard0720.model.Film;
 import howard0720.repository.FilmRepo;
@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Path("/")
-public class GreetingResource {
+public class FilmController {
     @Inject
     FilmRepo filmRepo;
 
